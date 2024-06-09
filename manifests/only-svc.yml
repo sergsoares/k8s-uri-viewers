@@ -49,8 +49,8 @@ spec:
       serviceAccountName: k8s-uri-viewers
       containers:
       - name: k8s-uri-viewers
-        image: svc-controller:latest
-        imagePullPolicy: Never
+        image: k8s-uri-viewers:latest
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080
       restartPolicy: Always
