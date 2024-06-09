@@ -1,0 +1,35 @@
+
+	<!DOCTYPE html>
+	<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>K8S Service List</title>
+		<script src="https://unpkg.com/htmx.org@1.8.2"></script>
+	</head>
+	<body>
+		<h2>K8S Service List</h2>
+
+		<form id="searchForm">
+        <input type="text" name="name" placeholder="Search query" required>
+        <select name="type" required>
+            <option value="service">Service</option>
+            <option value="ingress">Ingress</option>
+            <option value="gateway">Gateway</option>
+        </select>
+        <button 
+            type="submit" 
+            hx-get="/" 
+            hx-include="#searchForm"
+            hx-target="body">
+            Search
+        </button>
+    </form>
+
+		<ul>
+			{{ range . }}
+			<li><a href="{{ .URL }}">{{ .Name }}.{{ .Namespace }}.svc.cluster.local:{{ .Port }}</a></li>
+			{{ end }}
+		</ul>
+	</body>
+	</html>

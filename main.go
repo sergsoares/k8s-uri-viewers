@@ -28,57 +28,21 @@ func main() {
 
 func handleRoot(w http.ResponseWriter, r *http.Request) {
 	log.Println("Received request")
+	name := r.FormValue("name")
+	log.Println("name: " + name)
+
 	services, err := getK8sServices()
-	tmpl := ""
-	if err != nil {
-		// http.Error(w, "Error retrieving services", http.StatusInternalServerError)
-		// return
-		tmpl = `
-	<!DOCTYPE html>
-	<html lang="en">
-	<head>
-		<meta charset="UTF-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<title>K8S Service List</title>
 
-	</head>
-	<body>
-		<h1>K8S Service List</h1>
-		<ul>
-			<p> Error Loading services </p>
-		</ul>
-	</body>
-	</html>`
-	} else {
-
-	tmpl = `
-	<!DOCTYPE html>
-	<html lang="en">
-	<head>
-		<meta charset="UTF-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<title>K8S Service List</title>
-
-	</head>
-	<body>
-		<h1>K8S Service List</h1>
-		<ul>
-			{{ range . }}
-			<li><a href="{{ .URL }}">{{ .Name }}.{{ .Namespace }}.svc.cluster.local:{{ .Port }}</a></li>
-			{{ end }}
-		</ul>
-	</body>
-	</html>`
-}
-
-	t, err := template.New("services").Parse(tmpl)
+	t, err := template.ParseFiles("index.tmpl")
 	if err != nil {
 		http.Error(w, "Error parsing template", http.StatusInternalServerError)
+		log.Println(err)
 		return
 	}
 
 	if err := t.Execute(w, services); err != nil {
 		http.Error(w, "Error executing template", http.StatusInternalServerError)
+		log.Println(err)
 	}
 }
 
