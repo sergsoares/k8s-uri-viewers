@@ -9,3 +9,6 @@ For install the solution you can use the default manifest that create a unique
 ```shell
 kubectl apply -f https://raw.githubusercontent.com/sergsoares/k8s-uri-viewers/main/manifests/only-svc.yml
 ```
+
+## Demo
+![demo](./k8s-uri-viewers.gif)
