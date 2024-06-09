@@ -24,6 +24,7 @@ WORKDIR /
 
 # Copy the pre-built binary file from the builder stage
 COPY --from=builder /app/main .
+COPY --from=builder /app/index.tmpl .
 
 # Expose port 8080 to the outside world
 EXPOSE 8080

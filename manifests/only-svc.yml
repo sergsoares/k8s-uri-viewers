@@ -1,0 +1,70 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: k8s-uri-viewers
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: k8s-uri-viewers
+  namespace: k8s-uri-viewers
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: k8s-uri-viewers
+rules:
+- apiGroups: [""]
+  resources: ["services"]
+  verbs: ["get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: k8s-uri-viewers
+  namespace: k8s-uri-viewers
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: k8s-uri-viewers
+subjects:
+- kind: ServiceAccount
+  name: k8s-uri-viewers
+  namespace: k8s-uri-viewers
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: k8s-uri-viewers
+  namespace: k8s-uri-viewers
+spec:
+  selector:
+    matchLabels:
+      app: k8s-uri-viewers
+  template:
+    metadata:
+      labels:
+        app: k8s-uri-viewers
+    spec:
+      serviceAccountName: k8s-uri-viewers
+      containers:
+      - name: k8s-uri-viewers
+        image: svc-controller:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 8080
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 60
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: k8s-uri-viewers-svc
+  namespace: k8s-uri-viewers
+spec:
+  type: ClusterIP
+  ports:
+    - targetPort: 8080
+      port: 80
+  selector:
+      app: k8s-uri-viewers

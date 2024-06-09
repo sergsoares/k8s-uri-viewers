@@ -12,3 +12,11 @@ build:
 tag:
 	docker tag svc-controller:latest ttl.sh/svc-controller-1717462569:1h
 	docker push ttl.sh/svc-controller-1717462569:1h
+
+k3d-import:
+	k3d image import svc-controller -c svc-controller
+
+build-import: build k3d-import
+
+apply:
+	kubectl apply -f manifests/

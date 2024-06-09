@@ -40,7 +40,7 @@ func handleRoot(w http.ResponseWriter, r *http.Request) {
 	services, err := getK8sServices()
 	itemsFiltered := filterByQueryStrings(services, filters)
 
-	t, err := template.ParseFiles("index.tmpl")
+	t, err := template.ParseFiles("./index.tmpl")
 	if err != nil {
 		http.Error(w, "Error parsing template", http.StatusInternalServerError)
 		log.Println(err)
