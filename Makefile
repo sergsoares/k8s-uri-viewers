@@ -38,3 +38,10 @@ k3d-delete-cluster:
 # k3d import to put image inside k3d cluster
 k3d-import:
 	k3d image import k8s-uri-viewers -c k8s-uri-viewers
+
+dockerhub-publish:
+	docker tag k8s-uri-viewers sergsoares/k8s-uri-viewers:0.0.1
+	docker push sergsoares/k8s-uri-viewers:0.0.1
+
+dockerhub-login:
+	docker login  -u sergsoares
