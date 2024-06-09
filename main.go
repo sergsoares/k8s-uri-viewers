@@ -6,6 +6,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"strings"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -26,12 +27,18 @@ func main() {
 	log.Fatal(http.ListenAndServe("127.0.0.1:8080", nil))
 }
 
+type Filters struct {
+	Name string
+}
+
 func handleRoot(w http.ResponseWriter, r *http.Request) {
 	log.Println("Received request")
 	name := r.FormValue("name")
 	log.Println("name: " + name)
 
+	filters := Filters{Name: name}
 	services, err := getK8sServices()
+	itemsFiltered := filterByQueryStrings(services, filters)
 
 	t, err := template.ParseFiles("index.tmpl")
 	if err != nil {
@@ -40,10 +47,20 @@ func handleRoot(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := t.Execute(w, services); err != nil {
+	if err := t.Execute(w, itemsFiltered); err != nil {
 		http.Error(w, "Error executing template", http.StatusInternalServerError)
 		log.Println(err)
 	}
+}
+
+func filterByQueryStrings(items []Service, filters Filters) ([]Service) {
+	var filtered []Service
+	for _, item := range items {
+		if strings.Contains(item.Name, filters.Name) {
+			filtered = append(filtered, item)
+		}
+	}
+	return filtered
 }
 
 func getK8sServices() ([]Service, error) {
