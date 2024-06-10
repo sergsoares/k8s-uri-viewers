@@ -2,6 +2,8 @@ name: publish
 
 on:
   push:
+    branches:
+      - main
     tags:
       - '*'
 
@@ -23,6 +25,8 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - run: echo "${{ github.repository_owner }}/${{ github.repository }}:${{ github.sha }}"
 
       - name: Build and push
         uses: docker/build-push-action@v5
