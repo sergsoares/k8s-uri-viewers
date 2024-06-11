@@ -4,9 +4,13 @@ import (
 	"context"
 	"fmt"
 	"html/template"
+	"strings"
+
 	"log"
 	"net/http"
-	"strings"
+	"strconv"
+
+	"github.com/samber/lo"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -29,14 +33,29 @@ func main() {
 
 type Filters struct {
 	Name string
+	Port int32
+}
+
+func NewFilters(r *http.Request) Filters {
+	port := r.FormValue("port")
+	portInt, err := strconv.Atoi(port)
+
+	if err != nil {
+		log.Println("Incorrect port defined: " + port)
+	}
+
+	return Filters{
+		Name: r.FormValue("name"),
+		Port: int32(portInt),
+	}
 }
 
 func handleRoot(w http.ResponseWriter, r *http.Request) {
 	log.Println("Received request")
-	name := r.FormValue("name")
-	log.Println("name: " + name)
 
-	filters := Filters{Name: name}
+	filters := NewFilters(r)
+	log.Println(filters)
+
 	services, err := getK8sServices()
 	itemsFiltered := filterByQueryStrings(services, filters)
 
@@ -53,14 +72,27 @@ func handleRoot(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func filterByQueryStrings(items []Service, filters Filters) ([]Service) {
-	var filtered []Service
-	for _, item := range items {
-		if strings.Contains(item.Name, filters.Name) {
-			filtered = append(filtered, item)
-		}
+func filterByQueryStrings(items []Service, filters Filters) []Service {
+	var portFiltered []Service
+	var nameFiltered []Service
+
+	if filters.Port != 0 {
+		portFiltered = lo.Filter(items, func(item Service, index int) bool {
+			return item.Port == filters.Port
+		})
+	} else {
+		portFiltered = items
 	}
-	return filtered
+
+	if filters.Name != "" {
+		nameFiltered = lo.Filter(portFiltered, func(item Service, index int) bool {
+			return strings.Contains(item.Name, filters.Name)
+		})
+	} else {
+		nameFiltered = portFiltered
+	}
+
+	return nameFiltered
 }
 
 func getK8sServices() ([]Service, error) {
