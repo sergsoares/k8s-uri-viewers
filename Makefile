@@ -45,3 +45,23 @@ dockerhub-publish:
 
 dockerhub-login:
 	docker login  -u sergsoares
+
+hadolint:
+	docker run --rm -i hadolint/hadolint < Dockerfile
+
+dockle:
+	docker run --rm -v /var/run/docker.sock:/var/run/docker.sock goodwithtech/dockle:v0.4.14 sergsoares/k8s-uri-viewers:0.0.1
+
+grype:
+	docker run --rm \
+		--volume /var/run/docker.sock:/var/run/docker.sock \
+		--name Grype anchore/grype:latest \
+		sergsoares/k8s-uri-viewers:0.0.1
+
+trivy:
+	docker run --rm \
+		--volume /var/run/docker.sock:/var/run/docker.sock \
+		--name trivy aquasec/trivy \
+		image sergsoares/k8s-uri-viewers:0.0.1
+
+ci: hadolint dockle
