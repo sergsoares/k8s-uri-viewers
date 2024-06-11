@@ -31,12 +31,17 @@ type Filters struct {
 	Name string
 }
 
+func NewFilters(r *http.Request) Filters {
+	return Filters{
+		Name: r.FormValue("name"),
+	}
+}
+
 func handleRoot(w http.ResponseWriter, r *http.Request) {
 	log.Println("Received request")
-	name := r.FormValue("name")
-	log.Println("name: " + name)
 
-	filters := Filters{Name: name}
+	filters := NewFilters(r)
+	log.Println(filters)
 	services, err := getK8sServices()
 	itemsFiltered := filterByQueryStrings(services, filters)
 
@@ -53,7 +58,7 @@ func handleRoot(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func filterByQueryStrings(items []Service, filters Filters) ([]Service) {
+func filterByQueryStrings(items []Service, filters Filters) []Service {
 	var filtered []Service
 	for _, item := range items {
 		if strings.Contains(item.Name, filters.Name) {
