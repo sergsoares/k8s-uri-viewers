@@ -6,6 +6,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -29,11 +30,20 @@ func main() {
 
 type Filters struct {
 	Name string
+	Port int
 }
 
 func NewFilters(r *http.Request) Filters {
+	port := r.FormValue("port")
+	portInt, err := strconv.Atoi(port)
+
+	if err != nil {
+		log.Println("Incorrect port defined: " + port)
+	}
+
 	return Filters{
 		Name: r.FormValue("name"),
+		Port: portInt,
 	}
 }
 
@@ -42,6 +52,7 @@ func handleRoot(w http.ResponseWriter, r *http.Request) {
 
 	filters := NewFilters(r)
 	log.Println(filters)
+
 	services, err := getK8sServices()
 	itemsFiltered := filterByQueryStrings(services, filters)
 
