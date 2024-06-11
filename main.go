@@ -44,12 +44,8 @@ func NewFilters(r *http.Request) Filters {
 		log.Println("Incorrect port defined: " + port)
 	}
 
-	var name string
-	if r.FormValue("name") != "" {
-		name = r.FormValue("name")
-	}
 	return Filters{
-		Name: name,
+		Name: r.FormValue("name"),
 		Port: int32(portInt),
 	}
 }
